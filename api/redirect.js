@@ -1,25 +1,23 @@
-export default async function handler(req, res) {
-  const { token } = req.query;
+export default function handler(req, res) {
+  const { url } = req.query;
 
-  if (!token) {
-    return res.status(400).send("Missing token");
+  if (!url) {
+    res.status(400).send("Invalid redirect URL");
+    return;
   }
 
-  try {
-    const r = await fetch(
-      `https://thoughtful-shayne-mlfiles-5730e5e6.koyeb.app/resolve?token=${token}`
-    );
+  res.setHeader("Content-Type", "text/html");
 
-    if (!r.ok) {
-      return res.status(403).send("Invalid or expired link");
-    }
-
-    const data = await r.json();
-
-    res.writeHead(302, { Location: data.url });
-    res.end();
-
-  } catch (e) {
-    res.status(500).send("Server error");
-  }
+  res.status(200).send(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta http-equiv="refresh" content="0;url=${url}">
+        <title>Redirecting...</title>
+      </head>
+      <body>
+        <p>Redirecting, please wait...</p>
+      </body>
+    </html>
+  `);
 }
