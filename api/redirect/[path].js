@@ -1,10 +1,13 @@
 export default function handler(req, res) {
-  const { url } = req.query;
+  const { data } = req.query; // read correct param
 
-  if (!url) {
+  if (!data) {
     res.status(400).send("Invalid redirect URL");
     return;
   }
+
+  // decode URL
+  const redirectUrl = decodeURIComponent(data);
 
   res.setHeader("Content-Type", "text/html");
 
@@ -12,7 +15,7 @@ export default function handler(req, res) {
     <!DOCTYPE html>
     <html>
       <head>
-        <meta http-equiv="refresh" content="0;url=${url}">
+        <meta http-equiv="refresh" content="0;url=${redirectUrl}">
         <title>Redirecting...</title>
       </head>
       <body>
