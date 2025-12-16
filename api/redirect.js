@@ -1,18 +1,22 @@
 export default function handler(req, res) {
-  const { token } = req.query;
+  const { url } = req.query;
 
-  // basic validation
-  if (!token) {
-    return res.status(400).send("Missing token");
+  if (!url) {
+    res.status(400).send("Invalid redirect URL");
+    return;
   }
 
-  // TEMP TEST (replace later with DB or API)
-  // For now, just show token to confirm function works
+  res.setHeader("Content-Type", "text/html");
+
   res.status(200).send(`
+    <!DOCTYPE html>
     <html>
+      <head>
+        <meta http-equiv="refresh" content="0;url=${url}">
+        <title>Redirecting...</title>
+      </head>
       <body>
-        <h3>Redirect token received</h3>
-        <p>${token}</p>
+        <p>Redirecting, please wait...</p>
       </body>
     </html>
   `);
