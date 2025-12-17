@@ -1,13 +1,29 @@
-export default function handler(req, res) {
-  const data = req.query.data;
+from flask import Flask, request, redirect, abort
+import cloudscraper
 
-  if (!data) {
-    return res.status(400).send("Missing redirect data");
-  }
+from Thunder.utils.token_store import resolve_token, delete_token
 
-  const redirectUrl = decodeURIComponent(data);
+app = Flask(__name__)
 
-  // HARD redirect (this is important)
-  res.writeHead(302, { Location: redirectUrl });
-  res.end();
-}
+@app.route("/api/redirect/<path:any_path>")
+def redirect_handler(any_path):
+    token = request.args.get("token")
+    if not token:
+        abort(403)
+
+    short_url = resolve_token(token)
+    if not short_url:
+        return "Token expired or invalid", 403
+
+    # Optional: one-time token
+    delete_token(token)
+
+    # Optional: block bots
+    ua = request.headers.get("User-Agent", "").lower()
+    if not ua or "bot" in ua:
+        abort(403)
+
+    scraper = cloudscraper.create_scraper()
+    r = scraper.get(short_url, allow_redirects=True)
+
+    return redirect(r.url, code=302)
